@@ -111,9 +111,8 @@ func CreateUser(d *schema.ResourceData, meta interface{}) error {
 					return err
 				}
 				return nil
-			} else {
-				return errors.New("AzureAD: Identity for authentication not defined.")
 			}
+			return errors.New("AzureAD: Identity for authentication not defined.")
 		}
 	}
 

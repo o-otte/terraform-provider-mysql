@@ -6,7 +6,6 @@ import (
 
 	"errors"
 
-	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -53,6 +52,14 @@ func resourceUser() *schema.Resource {
 				ConflictsWith: []string{"plaintext_password", "password"},
 			},
 
+			"azure_managed_identity": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"plaintext_password", "password"},
+				RequiredWith:  []string{"auth_plugin"},
+			},
+
 			"tls_option": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -75,12 +82,38 @@ func CreateUser(d *schema.ResourceData, meta interface{}) error {
 		auth = v.(string)
 	}
 
+	if v, ok := d.GetOk("azure_managed_identity"); ok {
+		identity = v.(string)
+	}
+
 	if len(auth) > 0 {
 		switch auth {
 		case "AWSAuthenticationPlugin":
 			authStm = " IDENTIFIED WITH AWSAuthenticationPlugin as 'RDS'"
 		case "mysql_no_login":
 			authStm = " IDENTIFIED WITH mysql_no_login"
+		case "azuread":
+			if len(identity) > 0 {
+				var stmtSQL = "SET aad_auth_validate_oids_in_tenant = OFF"
+				log.Println("Executing statement:", stmtSQL)
+				_, err = db.Exec(stmtSQL)
+				if err != nil {
+					return err
+				}
+
+				stmtSQL = fmt.Sprintf("CREATE AADUSER '%s'@'%s' IDENTIFIED BY '%s'",
+					d.Get("user").(string),
+					d.Get("host").(string),
+					identity)
+				log.Println("Executing statement:", stmtSQL)
+				_, err = db.Exec(stmtSQL)
+				if err != nil {
+					return err
+				}
+				return nil
+			} else {
+				return errors.New("AzureAD: Identity for authentication not defined.")
+			}
 		}
 	}
 

@@ -44,7 +44,8 @@ The following arguments are supported:
 * `host` - (Optional) The source host of the user. Defaults to "localhost".
 * `plaintext_password` - (Optional) The password for the user. This must be provided in plain text, so the data source for it must be secured. An _unsalted_ hash of the provided password is stored in state. Conflicts with `auth_plugin`.
 * `password` - (Optional) Deprecated alias of `plaintext_password`, whose value is *stored as plaintext in state*. Prefer to use `plaintext_password` instead, which stores the password as an unsalted hash. Conflicts with `auth_plugin`.
-* `auth_plugin` - (Optional) Use an [authentication plugin][ref-auth-plugins] to authenticate the user instead of using password authentication.  Description of the fields allowed in the block below. Conflicts with `password` and `plaintext_password`.  
+* `auth_plugin` - (Optional) Use an [authentication plugin][ref-auth-plugins] to authenticate the user instead of using password authentication.  Description of the fields allowed in the block below. Conflicts with `password` and `plaintext_password`.
+* `azure_managed_identity` - (Optional) If [auth_plugin][ref-auth-plugins] is set to `azuread`, then this is the identity the user is identified with.
 * `tls_option` - (Optional) An TLS-Option for the `CREATE USER` or `ALTER USER` statement. The value is suffixed to `REQUIRE`. A value of 'SSL' will generate a `CREATE USER ... REQUIRE SSL` statement. See the [MYSQL `CREATE USER` documentation](https://dev.mysql.com/doc/refman/5.7/en/create-user.html) for more. Ignored if MySQL version is under 5.7.0.
 
 [ref-auth-plugins]: https://dev.mysql.com/doc/refman/5.7/en/authentication-plugins.html
@@ -63,6 +64,10 @@ The `auth_plugin` value supports:
   see [here][ref-mysql-no-login].
 
 [ref-mysql-no-login]: https://dev.mysql.com/doc/refman/5.7/en/no-login-pluggable-authentication.html
+
+* `azuread` -  Use an Azure managed identity to identify the user. The argument `azure_managed_identity` needs to be set to the clientID of the managed identity. A Azure Database for MySQL server has to be used, see [here][azure-managed-identity-mysql-connect].
+
+[azure-managed-identity-mysql-connect]: https://docs.microsoft.com/en-us/azure/mysql/howto-connect-with-managed-identity
 
 ## Attributes Reference
 

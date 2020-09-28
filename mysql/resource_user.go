@@ -101,7 +101,7 @@ func CreateUser(d *schema.ResourceData, meta interface{}) error {
 					return err
 				}
 
-				stmtSQL = fmt.Sprintf("CREATE AADUSER '%s'@'%s' IDENTIFIED BY '%s'",
+				stmtSQL = fmt.Sprintf("CREATE AADUSER '%s@%s' IDENTIFIED BY '%s'",
 					d.Get("user").(string),
 					d.Get("host").(string),
 					identity)
